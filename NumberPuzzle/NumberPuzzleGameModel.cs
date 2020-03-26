@@ -5,17 +5,21 @@ namespace NumberPuzzle
 {
     public class NumberPuzzleGameModel
     {
-        private int[] _numbers;
-        private Random _random;
+        private readonly int[] _numbers;
+        private readonly Random _random;
         public int PlayCount { get; private set; }
         public bool IsSolved => Enumerable.Range(0,_numbers.Length-1)
                                           .All(i => _numbers[i] == i + 1);
 
-        public NumberPuzzleGameModel()
+        public NumberPuzzleGameModel() : this(Enumerable.Range(0, 9).ToArray())
         {
-            _numbers = Enumerable.Range(0, 9).ToArray();
-            _random = new Random();
             Shuffle();
+        }
+
+        public NumberPuzzleGameModel(int[] numbers)
+        {
+            _numbers = numbers;
+            _random = new Random();
         }
 
         public char this[int i] => _numbers[i].ToString().Replace('0',' ')[0];
@@ -28,11 +32,15 @@ namespace NumberPuzzle
             PlayCount++;
             return true;
         }
-
         private int? GetBlankNeighbourIndex(int index)
         {
-            var neighbourIndexes = new[] { index - 3, index - 1, index + 1, index + 3 };
-            return neighbourIndexes.FirstOrDefault(IsBlank);
+            var row = index / 3;
+            var col = index % 3;
+            if (col < 2 && IsBlank(index + 1)) return index + 1;
+            if (col > 0 && IsBlank(index - 1)) return index - 1;
+            if (row < 2 && IsBlank(index + 3)) return index + 3;
+            if (row > 0 && IsBlank(index - 3)) return index - 3;
+            return null;
         }
 
         private bool IsBlank(int i)
